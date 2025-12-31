@@ -1,0 +1,25 @@
+# Rust Development Rules
+
+## Code Style
+- Follow Rust idioms and best practices
+- Use idiomatic error handling with Result<T, E> and Option<T>
+- Prefer using iterators and functional patterns over imperative loops
+- Use descriptive variable names following snake_case convention
+- Follow the Rust API guidelines
+
+## Code Quality
+- Avoid unwrap() and expect() in production code; handle errors properly
+- Use clippy suggestions to improve code quality
+- Keep functions focused and small
+- Prefer composition over complex inheritance patterns
+- Use cargo fmt for consistent formatting
+
+## Documentation
+- Add doc comments (///) for public APIs
+- Include examples in doc comments where helpful
+- Document safety requirements for unsafe code
+
+## Testing
+- Write unit tests in the same file using #[cfg(test)] modules
+- Use descriptive test names that explain what is being tested
+- Prefer integration tests for testing public APIs

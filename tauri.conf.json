@@ -1,0 +1,95 @@
+{
+	"build": {
+		"beforeDevCommand": "npm run dev",
+		"beforeBuildCommand": "",
+		"devPath": "http://localhost:5173",
+		"distDir": "ui/dist",
+		"withGlobalTauri": false
+	},
+	"package": {
+		"productName": "Giv Energy Dashboard",
+		"version": "0.1.0"
+	},
+	"tauri": {
+		"allowlist": {
+			"all": false,
+			"shell": {
+				"all": false,
+				"open": true
+			},
+			"dialog": {
+				"all": false,
+				"open": true
+			},
+			"http": {
+				"all": false,
+				"request": true,
+				"scope": ["https://**"]
+			}
+		},
+		"bundle": {
+			"active": true,
+			"targets": "all",
+			"identifier": "com.sambruca.dashboard",
+			"icon": [
+				"icons/32x32.png",
+				"icons/128x128.png",
+				"icons/128x128@2x.png",
+				"icons/icon.icns",
+				"icons/icon.ico"
+			],
+			"resources": [],
+			"copyright": "None",
+			"category": "Utility",
+			"shortDescription": "Giv Energy Dashboard",
+			"longDescription": "Giv Energy Dashboard is a tool that helps you view your Giv Energy data.",
+			"macOS": {
+				"frameworks": [],
+				"minimumSystemVersion": "10.13",
+				"license": "",
+				"entitlements": "entitlements.plist",
+				"providerShortName": null,
+				"signingIdentity": null,
+				"exceptionDomain": null
+			},
+			"windows": {
+				"certificateThumbprint": null,
+				"digestAlgorithm": "sha256",
+				"timestampUrl": "http://timestamp.digicert.com",
+				"wix": {
+					"language": ["en-US"],
+					"template": null
+				},
+				"nsis": {
+					"license": null,
+					"installerIcon": "icons/icon.ico",
+					"installMode": "currentUser",
+					"languages": ["en-US"],
+					"displayLanguageSelector": false
+				}
+			},
+			"deb": {
+				"depends": ["openvpn"]
+			},
+			"dmg": {
+				"appPosition": { "x": 180, "y": 170 },
+				"applicationFolderPosition": { "x": 480, "y": 170 },
+				"windowSize": { "width": 1024, "height": 1140 }
+			}
+		},
+		"security": {
+			"csp": null
+		},
+		"windows": [
+			{
+				"fullscreen": false,
+				"resizable": true,
+					"title": "Giv Energy Dashboard",
+					"width": 1024,
+				"height": 1140,
+				"minWidth": 1024,
+				"minHeight": 1140
+			}
+		]
+	}
+}
