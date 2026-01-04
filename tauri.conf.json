@@ -32,11 +32,7 @@
 			"targets": "all",
 			"identifier": "com.sambruca.dashboard",
 			"icon": [
-				"icons/32x32.png",
-				"icons/128x128.png",
-				"icons/128x128@2x.png",
 				"icons/icon.icns",
-				"icons/icon.ico"
 			],
 			"resources": [],
 			"copyright": "None",
@@ -62,14 +58,13 @@
 				},
 				"nsis": {
 					"license": null,
-					"installerIcon": "icons/icon.ico",
 					"installMode": "currentUser",
 					"languages": ["en-US"],
 					"displayLanguageSelector": false
 				}
 			},
 			"deb": {
-				"depends": ["openvpn"]
+				"depends": []
 			},
 			"dmg": {
 				"appPosition": { "x": 180, "y": 170 },
