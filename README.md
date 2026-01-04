@@ -65,31 +65,6 @@ This will:
 
 ## 🛠️ Development
 
-### Project Structure
-
-```
-giv-energy/
-├── src/                    # Rust backend
-│   ├── main.rs            # Tauri commands & app entry point
-│   ├── giv_energy_client.rs  # GivEnergy API client
-│   └── dash/              # Dashboard module
-├── ui/                     # React frontend
-│   ├── src/
-│   │   ├── App.tsx        # Main app component
-│   │   ├── components/    # React components
-│   │   │   ├── EnergyFlow.tsx    # Energy flow visualization
-│   │   │   ├── SolarPanel.tsx   # Solar panel display
-│   │   │   ├── GridPower.tsx    # Grid power display
-│   │   │   ├── Battery.tsx      # Battery display
-│   │   │   └── DebugDrawer.tsx  # Debug panel
-│   │   ├── services/      # API service layer
-│   │   └── types.ts       # TypeScript type definitions
-│   └── package.json       # Frontend dependencies
-├── Cargo.toml             # Rust dependencies
-├── tauri.conf.json        # Tauri configuration
-└── .env                   # Environment variables (not in git)
-```
-
 ### Key Technologies
 
 **Backend (Rust)**
@@ -127,25 +102,6 @@ The app connects to the GivEnergy Cloud API (`https://api.givenergy.cloud/v1`) a
 
 All API calls require authentication via the `GIV_ENERGY_API_KEY` environment variable.
 
-## 🎨 UI Components
-
-### Energy Flow Diagram
-
-The main visualization shows energy flow in a clock-like layout:
-- **Solar** at 12 o'clock (top)
-- **Grid** at 4 o'clock (bottom right)
-- **Battery** at 8 o'clock (bottom left)
-- **House** in the center
-
-All connections are shown as straight lines, with animated flow indicators when energy is actively flowing.
-
-### Component Cards
-
-- **SolarPanel**: Shows solar generation with animated sun icon
-- **GridPower**: Displays grid import/export with directional arrows
-- **Battery**: Shows battery level, charge/discharge status, and percentage
-- **EnergyFlow**: Interactive diagram of energy flow between all sources
-
 ## 🔧 Configuration
 
 ### Environment Variables
@@ -164,49 +120,6 @@ Main configuration is in `tauri.conf.json`:
 - Window size: 1024x1140
 - Dev server: `http://localhost:5173`
 - Build output: `ui/dist`
-
-## 🐛 Troubleshooting
-
-### App won't start
-
-1. **Check API key**: Ensure `.env` file exists with `GIV_ENERGY_API_KEY` set
-2. **Check dependencies**: Run `npm install` in `ui/` directory
-3. **Check Rust**: Ensure Rust is installed and up to date (`rustc --version`)
-
-### Data not loading
-
-1. **Check API key**: Verify your GivEnergy API key is correct
-2. **Check network**: Ensure you can reach `https://api.givenergy.cloud`
-3. **Check logs**: Look for error messages in the terminal
-
-### Paths not rendering correctly
-
-- The energy flow paths are calculated based on element positions
-- If paths look wrong, try refreshing the app
-- Check browser DevTools console for any errors
-
-## 📦 Dependencies
-
-### Rust Dependencies
-- `tauri` - Desktop app framework
-- `tokio` - Async runtime
-- `reqwest` - HTTP client
-- `serde` - Serialization
-- `dotenvy` - Environment variable loading
-
-### Frontend Dependencies
-- `react` - UI framework
-- `typescript` - Type safety
-- `tailwindcss` - Styling
-- `lucide-react` - Icons
-- `vite` - Build tool
-
-## 🤝 Contributing
-
-1. Make your changes
-2. Test thoroughly
-3. Ensure code follows existing patterns
-4. Submit a pull request
 
 ## 🙏 Acknowledgments
 
