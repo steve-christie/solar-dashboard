@@ -3,10 +3,9 @@
 Cargo.lock
 
 # Node
-/ui/node_modules
-/ui/dist
-/ui/.vite
-ui/package-lock.json
+node_modules
+dist
+.vite
 
 # Development
 .DS_Store
@@ -33,3 +32,5 @@ Thumbs.db
 .env.*.local
 
 .cursor/*
+target/*
+**/target/*
