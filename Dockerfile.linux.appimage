@@ -1,0 +1,38 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /app
+
+# System deps for Tauri v1 bundling
+RUN apt-get update && apt-get install -y \
+  ca-certificates \
+  build-essential \
+  pkg-config \
+  curl wget file \
+  git \
+  libssl-dev \
+  libgtk-3-dev \
+  libwebkit2gtk-4.0-dev \
+  libayatana-appindicator3-dev \
+  librsvg2-dev \
+  patchelf \
+  && rm -rf /var/lib/apt/lists/*
+
+# Node 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+  && apt-get update && apt-get install -y nodejs \
+  && rm -rf /var/lib/apt/lists/*
+
+# pnpm via Corepack (ships with Node 20)
+# Pin a pnpm version to keep builds reproducible
+RUN corepack enable && corepack prepare pnpm@10.24.0 --activate
+
+# Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+  | sh -s -- -y
+
+COPY scripts/build-release.sh /usr/local/bin/build-release.sh
+RUN chmod +x /usr/local/bin/build-release.sh
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+

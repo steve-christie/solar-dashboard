@@ -1,15 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import AppHeader from "./components/AppHeader";
-import { SolarPanel } from "./components/SolarPanel";
-import { GridPower } from "./components/GridPower";
-import { Battery } from "./components/Battery";
 import { EnergyFlow } from "./components/EnergyFlow";
-import { DebugDrawer } from "./components/DebugDrawer";
 import { getFullDashboardData } from "./services/api";
 import type { DashboardData } from "./types";
 import "./App.css";
-import { Card, CardContent } from "./components/ui/card";
-import { fakeData } from "./services/fake-data";
 
 function App() {
 	const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -27,7 +20,7 @@ function App() {
 			// const data = fakeData;
 			setDashboardData(data);
 			setLastRefresh(new Date());
-			
+
 			// Store inverter serial for future partial refreshes
 			if (fullRefresh && data.inverter?.serial) {
 				setCachedInverterSerial(data.inverter.serial);
@@ -73,8 +66,6 @@ function App() {
 
 	return (
 		<div className="h-screen bg-background flex flex-col">
-			<AppHeader/>
-
 			<main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
 				<div className="flex flex-col gap-4">
 					<div className="flex justify-between items-center">
@@ -115,47 +106,6 @@ function App() {
 										: dashboardData.inverter.request_data.consumption?.power ?? 0
 								}
 							/>
-
-							{/* Main Energy Sources Grid */}
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-								<SolarPanel
-									power={dashboardData.inverter.request_data.solar?.power ?? 0}
-									voltage={dashboardData.inverter.request_data.solar?.voltage ?? 0}
-									current={dashboardData.inverter.request_data.solar?.current ?? 0}
-								/>
-								<GridPower
-									power={dashboardData.inverter.request_data.grid?.power ?? 0}
-									voltage={dashboardData.inverter.request_data.grid?.voltage ?? 0}
-									current={dashboardData.inverter.request_data.grid?.current ?? 0}
-									frequency={dashboardData.inverter.request_data.grid?.frequency ?? 0}
-								/>
-								<Battery
-									power={dashboardData.inverter.request_data.battery?.power ?? 0}
-									voltage={dashboardData.inverter.request_data.battery?.voltage ?? 0}
-									current={dashboardData.inverter.request_data.battery?.current ?? 0}
-									percent={dashboardData.inverter.request_data.battery?.percent ?? 0}
-								/>
-							</div>
-
-							{/* Inverter Info */}
-							{dashboardData.inverter.serial && (
-								<Card>
-									<CardContent className="pt-6">
-										<div className="flex items-center justify-between">
-											<div>
-												<p className="text-sm text-muted-foreground">Inverter Serial</p>
-												<p className="text-lg font-semibold">{dashboardData.inverter.serial}</p>
-											</div>
-											{lastRefresh && (
-												<div className="text-right">
-													<p className="text-sm text-muted-foreground">Last Updated</p>
-													<p className="text-sm font-medium">{lastRefresh.toLocaleTimeString()}</p>
-												</div>
-											)}
-										</div>
-									</CardContent>
-								</Card>
-							)}
 						</div>
 					)}
 
@@ -169,15 +119,6 @@ function App() {
 					)}
 				</div>
 			</main>
-
-			<footer className="flex-shrink-0 text-center bg-card border-t border-border py-4 text-sm text-muted-foreground">
-				GivEnergy Dashboard v0.1.0 • Built with Rust + Tauri + React
-			</footer>
-
-			{/* Debug Drawer - Always available when data exists */}
-			{dashboardData?.inverter && (
-				<DebugDrawer data={dashboardData.inverter} />
-			)}
 		</div>
 	);
 }

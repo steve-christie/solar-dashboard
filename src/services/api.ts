@@ -1,7 +1,7 @@
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import type { DashboardStatus } from "../types";
 
-export async function getDashboardStatus(): Promise<DashboardStatus	> {
+export async function getDashboardStatus(): Promise<DashboardStatus> {
 	return await invoke("get_dashboard_status");
 }
 

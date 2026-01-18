@@ -134,16 +134,19 @@ async fn get_full_dashboard_data(
 
     let (account_data, devices_data, inverter_serial) = if full_refresh {
         log::info!("Performing full refresh: fetching account, devices, and inverter data");
-        
+
         // Step 1: Get account data
         let account = client.get_account().await.map_err(|e| {
             log::error!("Failed to fetch account data: {}", e);
             e.to_string()
         })?;
-        
+
         let account_name = account.name.clone();
-        log::info!("Successfully fetched account data, account name: {}", account_name);
-        
+        log::info!(
+            "Successfully fetched account data, account name: {}",
+            account_name
+        );
+
         // Convert account to JSON for return value
         let account_value = serde_json::to_value(&account).map_err(|e| {
             log::error!("Failed to serialize account to JSON: {}", e);
@@ -160,12 +163,10 @@ async fn get_full_dashboard_data(
             })?;
 
         let devices_value = devices.data.clone();
-        let devices_array = devices_value
-            .as_array()
-            .ok_or_else(|| {
-                log::error!("Devices data is not an array");
-                "Devices data is not an array".to_string()
-            })?;
+        let devices_array = devices_value.as_array().ok_or_else(|| {
+            log::error!("Devices data is not an array");
+            "Devices data is not an array".to_string()
+        })?;
 
         if devices_array.is_empty() {
             return Err("No devices found in account".to_string());
@@ -264,6 +265,9 @@ fn main() {
     }
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_http::init())
         .invoke_handler(tauri::generate_handler![
             get_account_data,
             get_inverter_data,
@@ -273,7 +277,7 @@ fn main() {
         .setup(|app| {
             #[cfg(debug_assertions)]
             {
-                let window = app.get_window("main").unwrap();
+                let window = app.get_webview_window("main").unwrap();
             }
             Ok(())
         })

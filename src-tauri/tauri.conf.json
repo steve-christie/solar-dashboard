@@ -1,61 +1,43 @@
 {
+	"productName": "Solar Dashboard",
+	"version": "0.1.0",
+	"identifier": "com.sambruca.solar-dashboard",
 	"build": {
 		"beforeDevCommand": "pnpm dev",
 		"beforeBuildCommand": "pnpm build",
-		"devPath": "http://localhost:5173",
-		"distDir": "../dist",
-		"withGlobalTauri": false
+		"devUrl": "http://localhost:5173"
 	},
-	"package": {
-		"productName": "Solar Dashboard",
-		"version": "0.1.0"
-	},
-	"tauri": {
-		"allowlist": {
-			"all": false,
-			"shell": {
-				"all": false,
-				"open": true
-			},
-			"dialog": {
-				"all": false,
-				"open": true
-			},
-			"http": {
-				"all": false,
-				"request": true,
-				"scope": ["https://**"]
-			}
-		},
-		"bundle": {
-			"active": true,
-			"targets": "all",
-			"identifier": "com.sambruca.solar-dashboard",
-			"icon": [
-				"icons/icon.icns"
-			],
-			"resources": [],
-			"copyright": "None",
-			"category": "Utility",
-			"shortDescription": "Solar Dashboard",
-			"longDescription": "Solar Dashboard is a tool that helps you view your solar data.",
-			"deb": {
-				"depends": []
-			}
-		},
-		"security": {
-			"csp": null
-		},
+	"app": {
 		"windows": [
 			{
 				"fullscreen": false,
 				"resizable": true,
-					"title": "Solar Dashboard",
-					"width": 1024,
-				"height": 1140,
+				"title": "Solar Dashboard",
+				"width": 1024,
+				"height": 600,
 				"minWidth": 1024,
-				"minHeight": 1140
+				"minHeight": 600
 			}
-		]
+		],
+		"security": {
+			"csp": null
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"icon": [
+			"icons/256x256.png"
+		],
+		"resources": [],
+		"copyright": "None",
+		"category": "Utility",
+		"shortDescription": "Solar Dashboard",
+		"longDescription": "Solar Dashboard is a tool that helps you view your solar data.",
+		"linux": {
+			"deb": {
+				"depends": []
+			}
+		}
 	}
 }
