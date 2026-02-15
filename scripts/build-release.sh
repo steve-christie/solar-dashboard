@@ -4,6 +4,9 @@ set -e
 echo "🚀 Building Solar Dashboard Release..."
 echo ""
 
+
+ls
+
 # Colors for output
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -27,34 +30,11 @@ pnpm install --frozen-lockfile
 echo -e "${GREEN}✓ Dependencies installed${NC}"
 echo ""
 
-# Build helper binary FIRST (before anything else that might trigger Tauri build)
-echo -e "${BLUE}Step 2: Building helper binary...${NC}"
-cd src-tauri
-cargo build --release --bin squawker-helper
-cd ../
-echo -e "${GREEN}✓ Helper binary built${NC}"
-echo ""
-
-# Create resources directory and copy helper BEFORE Tauri build
-echo -e "${BLUE}Step 3: Preparing helper for bundling...${NC}"
-mkdir -p src-tauri/resources
-cp src-tauri/target/release/solar-dashboard src-tauri/resources/solar-dashboard
-echo ""
-
-# Verify helper is in place
-if [ ! -f "src-tauri/resources/solar-dashboard" ]; then
-    echo -e "${RED}❌ Error: Helper binary not found at resources/solar-dashboard${NC}"
-    exit 1
-fi
-
-# Show file size
-ls -lh src-tauri/resources/solar-dashboard
-
 # Build main application with Tauri
 echo ""
-echo -e "${BLUE}Step 4: Building Tauri application...${NC}"
+echo -e "${BLUE}Step 3: Building Tauri application...${NC}"
 echo -e "${BLUE}Working directory: $(pwd)${NC}"
-pnpm tauri build
+NO_STRIP=true pnpm tauri build
 
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
