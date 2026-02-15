@@ -1,0 +1,171 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: true
+        type: string
+
+# Ensure only one release workflow runs at a time
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  NODE_VERSION: '20'
+  PNPM_VERSION: '10'
+  RUST_BACKTRACE: 1
+
+jobs:
+  # =============================================================================
+  # Build job - runs on all platforms using matrix strategy
+  # =============================================================================
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+            
+          # Linux build
+          - platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            helper_binary: solar-dashboard
+            bundle_targets: appimage,deb
+
+    runs-on: ${{ matrix.platform }}
+    
+    steps:
+      # =========================================================================
+      # Setup
+      # =========================================================================
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "'.' -> target"
+
+      # =========================================================================
+      # Linux-specific dependencies
+      # =========================================================================
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.0-dev \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            libgtk-3-dev
+
+      # =========================================================================
+      # Environment Configuration
+      # =========================================================================
+      - name: Generate .env.prod file (Unix)
+        if: matrix.platform != 'windows-latest'
+        run: |
+          cat > src-tauri/.env.prod << EOF
+          THM_BASE_URL=${{ secrets.THM_BASE_URL_PROD }}
+          EOF
+
+      - name: Generate .env.prod file (Windows)
+        if: matrix.platform == 'windows-latest'
+        shell: pwsh
+        run: |
+          @"
+          THM_BASE_URL=${{ secrets.THM_BASE_URL_PROD }}
+          "@ | Out-File -FilePath src-tauri/.env.prod -Encoding utf8
+
+      # =========================================================================
+      # Build
+      # =========================================================================
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Tauri application
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use production environment
+          BUILD_ENV: production
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Solar Dashboard ${{ github.ref_name }}'
+          releaseBody: |
+            See the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+            ## Downloads
+            - **Linux**: Download the `.AppImage` or `.deb` package
+          releaseDraft: true
+          prerelease: false
+          args: --target ${{ matrix.target }} --bundles ${{ matrix.bundle_targets }}
+
+  # =============================================================================
+  # Publish release - runs after all builds complete
+  # =============================================================================
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Publish release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const tag = context.ref.replace('refs/tags/', '');
+            
+            // Find the draft release
+            const releases = await github.rest.repos.listReleases({ owner, repo });
+            const draftRelease = releases.data.find(r => r.draft && r.tag_name === tag);
+            
+            if (draftRelease) {
+              // Publish the release (remove draft status)
+              await github.rest.repos.updateRelease({
+                owner,
+                repo,
+                release_id: draftRelease.id,
+                draft: false
+              });
+              console.log(`✅ Published release: ${tag}`);
+            } else {
+              console.log(`⚠️ No draft release found for tag: ${tag}`);
+            }
