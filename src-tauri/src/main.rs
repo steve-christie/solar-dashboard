@@ -251,17 +251,74 @@ async fn get_full_dashboard_data(
     Ok(combined)
 }
 
+/// Returns the path to `.env` in the platform-specific config directory, if available.
+/// Linux: `$HOME/.config/solar-dashboard/.env`
+/// macOS: `$HOME/Library/Application Support/solar-dashboard/.env`
+/// Windows: `%APPDATA%/solar-dashboard/.env`
+fn config_dir_env_path() -> Option<std::path::PathBuf> {
+    #[cfg(target_os = "macos")]
+    return std::env::var("HOME").ok().map(|h| {
+        std::path::PathBuf::from(h)
+            .join("Library")
+            .join("Application Support")
+            .join("solar-dashboard")
+            .join(".env")
+    });
+
+    #[cfg(all(unix, not(target_os = "macos")))]
+    return std::env::var("HOME")
+        .ok()
+        .map(|h| std::path::PathBuf::from(h).join(".config").join("solar-dashboard").join(".env"));
+
+    #[cfg(windows)]
+    return std::env::var("APPDATA")
+        .ok()
+        .map(|p| std::path::PathBuf::from(p).join("solar-dashboard").join(".env"));
+
+    #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
+    None
+}
+
 fn main() {
     // Initialize logger
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
     log::info!("Starting GivEnergy Dashboard application");
 
-    // Load environment variables from .env file
-    if let Err(e) = dotenvy::dotenv() {
-        log::warn!("Could not load .env file: {}", e);
-        log::warn!("Continuing without .env file...");
-    } else {
-        log::info!("Successfully loaded .env file");
+    // Load environment variables from .env file.
+    // Try (1) executable directory, (2) platform config dir, (3) current working directory (dev).
+    let mut loaded = false;
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let env_path = exe_dir.join(".env");
+            if env_path.exists() {
+                if let Err(e) = dotenvy::from_path(&env_path) {
+                    log::warn!("Could not load .env from executable directory: {}", e);
+                } else {
+                    log::info!("Loaded .env from executable directory");
+                    loaded = true;
+                }
+            }
+        }
+    }
+    if !loaded {
+        if let Some(config_env) = config_dir_env_path() {
+            if config_env.exists() {
+                if let Err(e) = dotenvy::from_path(&config_env) {
+                    log::warn!("Could not load .env from config directory: {}", e);
+                } else {
+                    log::info!("Loaded .env from config directory");
+                    loaded = true;
+                }
+            }
+        }
+    }
+    if !loaded {
+        if let Err(e) = dotenvy::dotenv() {
+            log::warn!("Could not load .env from current directory: {}", e);
+            log::warn!("Continuing without .env file...");
+        } else {
+            log::info!("Loaded .env from current directory");
+        }
     }
 
     tauri::Builder::default()

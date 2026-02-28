@@ -91,6 +91,15 @@ This will:
 - Compile the Rust backend
 - Create platform-specific installers in `src-tauri/target/release/bundle/`
 
+**Environment variables in the built app:** The app does not embed your `.env` (it is gitignored and may contain secrets). For **local testing** of the release build, the build process copies your project root `.env` into `target/release/`, so running the binary from there (e.g. `./src-tauri/target/release/solar-dashboard`) uses it automatically. For **installed or distributed** builds (e.g. after installing the .deb or running the AppImage from elsewhere), put a `.env` in one of these locations (first found wins):
+
+- **Next to the executable** – same folder as the app binary (e.g. next to the `.AppImage`).
+- **Config directory:**
+  - **Linux:** `~/.config/solar-dashboard/.env`
+  - **macOS:** `~/Library/Application Support/solar-dashboard/.env`
+  - **Windows:** `%APPDATA%\solar-dashboard\.env`
+- **Current working directory** – e.g. when running with `tauri dev` from the project root.
+
 ## 📝 API Integration
 
 The app connects to the GivEnergy Cloud API (`https://api.givenergy.cloud/v1`) and fetches:
